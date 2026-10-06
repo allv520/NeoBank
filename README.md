@@ -22,6 +22,33 @@
 
 ---
 
+## 📸 Скриншоты
+
+<table>
+  <tr>
+    <td width="50%">
+      <h3 align="center">👤 Личный кабинет</h3>
+      <img src="docs/screenshots/dashboard.jpg" alt="Личный кабинет"/>
+    </td>
+    <td width="50%">
+      <h3 align="center">📊 Аналитика транзакций</h3>
+      <img src="docs/screenshots/analytics.jpg" alt="Аналитика"/>
+    </td>
+  </tr>
+  <tr>
+    <td width="50%">
+      <h3 align="center">🏦 Кредиты со скорингом</h3>
+      <img src="docs/screenshots/credit.jpg" alt="Кредиты"/>
+    </td>
+    <td width="50%">
+      <h3 align="center">👨‍💼 Панель администратора</h3>
+      <img src="docs/screenshots/admin.jpg" alt="Админ-панель"/>
+    </td>
+  </tr>
+</table>
+
+---
+
 ## ✨ Возможности
 
 ### 👤 Для пользователя
