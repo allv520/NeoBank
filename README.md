@@ -24,6 +24,10 @@
 
 ## 📸 Скриншоты
 
+### 🏠 Главная страница
+
+<img src="docs/screenshots/landing.jpg" alt="Главная страница" width="100%"/>
+
 <table>
   <tr>
     <td width="50%">
@@ -37,19 +41,15 @@
   </tr>
   <tr>
     <td width="50%">
-      <h3 align="center">⚙️ Профиль</h3>
-      <img src="docs/screenshots/dashboard.jpg" alt="Профиль" width="100%"/>
-    </td>
-    <td width="50%">
       <h3 align="center">💳 Управление картами</h3>
       <img src="docs/screenshots/cards.jpg" alt="Карты" width="100%"/>
     </td>
+    <td width="50%">
+      <h3 align="center">🏦 Кредиты со скорингом</h3>
+      <img src="docs/screenshots/credit.jpg" alt="Кредиты" width="100%"/>
+    </td>
   </tr>
 </table>
-
-### 🏦 Кредиты со скорингом
-
-<img src="docs/screenshots/credit.jpg" alt="Кредиты" width="100%"/>
 
 ### 👨‍💼 Панель администратора
 
