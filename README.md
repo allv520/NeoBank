@@ -37,8 +37,8 @@
   </tr>
   <tr>
     <td width="50%">
-      <h3 align="center">⚙️ Профиль и настройки</h3>
-      <img src="docs/screenshots/profile.jpg" alt="Профиль" width="100%"/>
+      <h3 align="center">⚙️ Профиль</h3>
+      <img src="docs/screenshots/dashboard.jpg" alt="Профиль" width="100%"/>
     </td>
     <td width="50%">
       <h3 align="center">💳 Управление картами</h3>
