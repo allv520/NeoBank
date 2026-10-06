@@ -28,24 +28,32 @@
   <tr>
     <td width="50%">
       <h3 align="center">👤 Личный кабинет</h3>
-      <img src="docs/screenshots/dashboard.jpg" alt="Личный кабинет"/>
+      <img src="docs/screenshots/dashboard.jpg" alt="Личный кабинет" width="100%"/>
     </td>
     <td width="50%">
       <h3 align="center">📊 Аналитика транзакций</h3>
-      <img src="docs/screenshots/analytics.jpg" alt="Аналитика"/>
+      <img src="docs/screenshots/analytics.jpg" alt="Аналитика" width="100%"/>
     </td>
   </tr>
   <tr>
     <td width="50%">
-      <h3 align="center">🏦 Кредиты со скорингом</h3>
-      <img src="docs/screenshots/credit.jpg" alt="Кредиты"/>
+      <h3 align="center">⚙️ Профиль и настройки</h3>
+      <img src="docs/screenshots/profile.jpg" alt="Профиль" width="100%"/>
     </td>
     <td width="50%">
-      <h3 align="center">👨‍💼 Панель администратора</h3>
-      <img src="docs/screenshots/admin.jpg" alt="Админ-панель"/>
+      <h3 align="center">💳 Управление картами</h3>
+      <img src="docs/screenshots/cards.jpg" alt="Карты" width="100%"/>
     </td>
   </tr>
 </table>
+
+### 🏦 Кредиты со скорингом
+
+<img src="docs/screenshots/credit.jpg" alt="Кредиты" width="100%"/>
+
+### 👨‍💼 Панель администратора
+
+<img src="docs/screenshots/admin.jpg" alt="Админ-панель" width="100%"/>
 
 ---
 
