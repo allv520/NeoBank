@@ -127,7 +127,7 @@ r = 5 + (1 − S / 8) × 20
 ### 1️⃣ Клонирование
 
 ```bash
-git clone https://github.com/ВАШ_НИК/neobank.git
+git clone https://github.com/allv520/neobank.git
 cd neobank
 ```
 
