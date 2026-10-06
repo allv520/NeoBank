@@ -1,0 +1,101 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique // 'USER', 'ADMIN'
+  users     User[]
+  createdAt DateTime @default(now())
+}
+
+model CardType {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique // 'VIRTUAL', 'DEBIT', 'CREDIT'
+  cards     Card[]
+  createdAt DateTime @default(now())
+}
+
+model User {
+  id            Int           @id @default(autoincrement())
+  email         String        @unique
+  password      String
+  firstName     String
+  lastName      String?
+  phone         String?
+  balance       Float         @default(0.0)
+  createdAt     DateTime      @default(now())
+
+  roleId        Int
+  role          Role          @relation(fields: [roleId], references: [id])
+  cards         Card[]
+  credits       Credit[]
+}
+
+model Card {
+  id            Int          @id @default(autoincrement())
+  cardNumber    String       @unique
+  expiry        String
+  isBlocked     Boolean      @default(false)
+  monthlyLimit  Float        @default(500000.0)
+  createdAt     DateTime     @default(now())
+
+  userId        Int
+  user          User         @relation(fields: [userId], references: [id])
+  typeId        Int
+  type          CardType     @relation(fields: [typeId], references: [id])
+  transactions  Transaction[]
+}
+
+model Category {
+  id            Int          @id @default(autoincrement())
+  name          String       @unique
+  icon          String?
+  transactions  Transaction[]
+  createdAt     DateTime     @default(now())
+}
+
+model Transaction {
+  id            Int          @id @default(autoincrement())
+  name          String
+  amount        Float
+  type          String       // 'plus' или 'minus'
+  icon          String?
+  date          DateTime     @default(now())
+
+  cardId        Int?
+  card          Card?         @relation(fields: [cardId], references: [id])
+  categoryId    Int?
+  category      Category?    @relation(fields: [categoryId], references: [id])
+}
+
+model Credit {
+  id             Int      @id @default(autoincrement())
+  amount         Float
+  termMonths     Int
+  monthlyPayment Float
+  available      Float
+  interestRate   Float    @default(12.0)
+  issuedAt       DateTime @default(now())
+  nextPaymentDate DateTime
+  status         String   @default("active")
+  penalty        Float    @default(0.0)
+  createdAt      DateTime @default(now())
+
+  userId         Int
+  user           User     @relation(fields: [userId], references: [id])
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  email     String   @unique
+  password  String
+  name      String
+  createdAt DateTime @default(now())
+}
