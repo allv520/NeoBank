@@ -4,21 +4,26 @@
   <img src="https://img.shields.io/badge/React-18-61DAFB?style=for-the-badge&logo=react&logoColor=white" alt="React"/>
   <img src="https://img.shields.io/badge/Node.js-20-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js"/>
   <img src="https://img.shields.io/badge/Express-4-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express"/>
+  <img src="https://img.shields.io/badge/Python-3.14-3776AB?style=for-the-badge&logo=python&logoColor=white" alt="Python"/>
+  <img src="https://img.shields.io/badge/FastAPI-0.115-009688?style=for-the-badge&logo=fastapi&logoColor=white" alt="FastAPI"/>
   <img src="https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
   <img src="https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma"/>
   <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
+  <img src="https://img.shields.io/badge/scikit--learn-1.9-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white" alt="scikit-learn"/>
 </p>
 
 <p align="center">
-  <b>Дипломный проект</b> · Разработка программного комплекса цифровой банковской платформы <br/>
-  с модулем интерактивной аналитики транзакций.
+  <b>Дипломный проект</b> · Полнофункциональная банковская платформа с <b>ML-скорингом</b><br/>
+  и интерактивной аналитикой транзакций
 </p>
 
 ---
 
 ## 📖 О проекте
 
-**NEOBANK** — цифровая банковская платформа с возможностью управления личными финансами, оформления кредитов с **индивидуальной процентной ставкой** (рассчитывается автоматически на основе математической скоринговой модели) и интерактивной аналитики расходов. Платформа объединяет банковский функционал и наглядную аналитику в едином интерфейсе, делая управление финансами простым и понятным.
+**NEOBANK** — цифровая банковская платформа с возможностью управления личными финансами, оформления кредитов с **индивидуальной процентной ставкой** и интерактивной аналитики расходов.
+
+**Ключевая особенность:** индивидуальная ставка рассчитывается **двумя способами** — классической аддитивной свёрткой и **ML-моделью**, обученной на данных. Система автоматически переключается между ними (fallback).
 
 ---
 
@@ -63,7 +68,7 @@
 ## ✨ Возможности
 
 ### 👤 Для пользователя
-- 🔐 Регистрация и вход (JWT)
+- 🔐 Регистрация и вход (JWT + bcrypt)
 - 💳 Управление виртуальными картами
 - ➕ Создание и перевыпуск карт
 - 🔒 Блокировка и лимиты
@@ -78,7 +83,6 @@
 - 🔍 Все транзакции с фильтрацией
 - 💼 Все кредиты с детализацией
 - 🚫 Массовая блокировка карт
-- 📊 Детальный просмотр каждого пользователя
 
 ---
 
@@ -88,36 +92,173 @@
 
 **⚙️ Backend:** Node.js · Express · Prisma ORM · JWT · bcrypt
 
-**🗄️ Инфраструктура:** PostgreSQL · Docker · Git · Prisma Studio
+**🐍 ML-модуль:** Python 3.14 · scikit-learn · pandas · numpy · joblib · FastAPI · Uvicorn
+
+**🗄️ Инфраструктура:** PostgreSQL · Docker · Git
 
 ---
 
 ## 🏗️ Архитектура
 
+### Общая схема
+
+```
+┌──────────────────────────────────────────────────────┐
+│              👤 Пользователь / 👨‍💼 Админ              │
+└───────────────────────┬──────────────────────────────┘
+                        │ HTTPS
+                        ▼
+┌──────────────────────────────────────────────────────┐
+│                🖥️ React Client (:5173)               │
+│         React · Vite · Recharts · Axios              │
+└───────────────────────┬──────────────────────────────┘
+                        │ REST API
+                        ▼
+┌──────────────────────────────────────────────────────┐
+│              ⚙️ Node.js Server (:5000)               │
+│         Express · JWT · bcrypt · Prisma              │
+│                                                       │
+│         scoring-service.js (гибридный скоринг)       │
+│              │                                        │
+│        ┌─────┴──────┐                                │
+│        ▼            ▼                                │
+│   🐍 ML-Service   📐 Fallback                        │
+│     (:8000)         (аддитивная)                     │
+└───────────────────────┬──────────────────────────────┘
+                        │ Prisma ORM
+                        ▼
+┌──────────────────────────────────────────────────────┐
+│              🗄️ PostgreSQL (Docker)                   │
+└──────────────────────────────────────────────────────┘
+```
+
+### ML-модуль
+
 ```mermaid
 flowchart TB
     User(("👤<br/>Пользователь"))
-    Admin(("👨‍💼<br/>Администратор"))
-
-    Client["🖥️ Клиент<br/><b>React + Vite</b><br/><i>Recharts · Axios · Router</i>"]
-    Server["⚙️ Сервер<br/><b>Node.js + Express</b><br/><i>JWT · bcrypt · scoring.js</i>"]
+    
+    React["🖥️ React Client<br/><i>:5173</i>"]
+    Node["⚙️ Node.js Server<br/><b>NEOBANK</b><br/><i>:5000</i>"]
+    ML["🐍 ML-Service<br/><b>FastAPI</b><br/><i>:8000</i>"]
+    Model[("📦 model.pkl<br/>LogisticRegression")]
     DB[("🗄️ PostgreSQL<br/><i>Docker</i>")]
-
-    User -->|HTTPS| Client
-    Admin -->|HTTPS| Client
-    Client -->|"REST API"| Server
-    Server -->|"Prisma ORM"| DB
-
-    style User fill:#6e45e2,color:#fff,stroke:none
-    style Admin fill:#6e45e2,color:#fff,stroke:none
-    style Client fill:#61DAFB,color:#000,stroke:none
-    style Server fill:#339933,color:#fff,stroke:none
-    style DB fill:#4169E1,color:#fff,stroke:none
+    Fallback["📐 Fallback<br/>Аддитивная свёртка"]
+    
+    User --> React
+    React -->|"HTTP"| Node
+    Node -->|"HTTP /predict"| ML
+    ML --> Model
+    Node -.->|"если ML упал"| Fallback
+    Node -->|"Prisma"| DB
+    
+    style User fill:#6e45e2,color:#fff
+    style React fill:#61DAFB,color:#000
+    style Node fill:#339933,color:#fff
+    style ML fill:#3776AB,color:#fff
+    style Model fill:#F7931E,color:#fff
+    style DB fill:#4169E1,color:#fff
+    style Fallback fill:#ff6b6b,color:#fff
 ```
 
 ---
 
-## 🧮 Математическая модель скоринга
+## 🧠 ML-модуль
+
+Помимо классического подхода (аддитивная свёртка), в проект **интегрирована ML-модель** кредитного скоринга.
+
+### 🎯 Сравнение подходов
+
+| Подход | Принцип | ROC-AUC |
+|--------|---------|:-------:|
+| **Аддитивная свёртка** | Экспертные веса, придуманные человеком | ~0.60 |
+| **ML-модель (LogReg)** | Обучена на данных, находит закономерности | **0.68–0.73** |
+
+### 🔄 Как работает
+
+1. Пользователь открывает раздел «Кредиты»
+2. React отправляет запрос `GET /api/credit/rate`
+3. Node.js вызывает `getInterestRate(userId)`
+4. **Пробует ML-сервис** → отправляет 8 признаков на `:8000/predict`
+5. ML-сервис возвращает **персональную ставку** (6–10%)
+6. Если ML недоступен → **fallback** на аддитивную свёртку (14–18%)
+
+### 📊 Метрики ML-модели
+
+Обучено 3 модели на **1000 примерах**:
+
+| Модель | Accuracy | Precision | Recall | F1 | **ROC-AUC** |
+|--------|:--------:|:---------:|:------:|:--:|:-----------:|
+| **Random Forest** | 0.770 | 0.524 | 0.234 | 0.324 | **0.727** 🥇 |
+| Logistic Regression | 0.770 | 0.529 | 0.191 | 0.281 | 0.675 |
+| Decision Tree | 0.730 | 0.333 | 0.149 | 0.206 | 0.667 |
+
+### 📈 Важность признаков (Random Forest)
+
+| Признак | Важность |
+|---------|:--------:|
+| `debt_ratio` | **0.289** |
+| `expense` | 0.178 |
+| `income` | 0.156 |
+| `days_on_platform` | 0.129 |
+| `balance` | 0.123 |
+| `has_overdue` | 0.045 |
+| `active_cards` | 0.041 |
+| `closed_credits` | 0.039 |
+
+### 📉 Сравнение ML и аддитивной свёртки
+
+На **10 реальных пользователях**:
+
+| Пользователь | Аддитивная | ML | Разница |
+|:------------:|:----------:|:--:|:-------:|
+| 1 | 18.23% | 9.93% | -8.30 |
+| 2 | 15.62% | 6.64% | -8.98 |
+| 3 | 14.43% | 7.89% | -6.54 |
+| 4 | 16.49% | 8.01% | -8.48 |
+| 5 | 15.89% | 8.31% | -7.58 |
+| 6 | 15.81% | 6.89% | -8.92 |
+| 7 | 17.01% | 8.96% | -8.05 |
+| 8 | 15.89% | 6.79% | -9.10 |
+| 9 | 14.01% | 6.56% | -7.45 |
+| 10 | 17.36% | 7.35% | -10.01 |
+
+**Вывод:** ML-модель даёт **более низкие и калиброванные** ставки для надёжных заёмщиков. Это делает кредитование **доступнее**.
+
+### 🚀 Запуск ML-сервиса
+
+```bash
+# 1. Активируем виртуальное окружение
+cd neobank-ml
+.venv\Scripts\Activate.ps1
+
+# 2. Запускаем Uvicorn
+cd ml-service
+uvicorn app:app --reload --port 8000
+```
+
+**Проверка:** `http://localhost:8000` → JSON со статусом `ok`.
+
+### 🧪 Тест ML-предсказания
+
+```bash
+curl -X POST http://localhost:8000/predict \
+  -H "Content-Type: application/json" \
+  -d '{
+    "income": 22000, "expense": 8000, "debt_ratio": 0.36,
+    "balance": 180000, "active_cards": 2, "days_on_platform": 300,
+    "closed_credits": 1, "has_overdue": 0
+  }'
+```
+
+**Ответ:**
+```json
+{"default_proba": 0.1545, "rate": 8.09, "model": "LogisticRegression"}
+```
+
+---
+
+## 🧮 Математическая модель скоринга (fallback)
 
 Индивидуальная процентная ставка рассчитывается по методу **аддитивной свёртки критериев**.
 
@@ -159,17 +300,18 @@ r = 5 + (1 − S / 8) × 20
 
 ### Требования
 - Node.js **18+**
+- Python **3.12+**
 - PostgreSQL **15+** (или Docker)
 - npm / yarn
 
 ### 1️⃣ Клонирование
 
 ```bash
-git clone https://github.com/allv520/neobank.git
-cd neobank
+git clone https://github.com/allv520/NeoBank.git
+cd NeoBank
 ```
 
-### 2️⃣ Запуск базы данных (Docker)
+### 2️⃣ Запуск PostgreSQL (Docker)
 
 ```bash
 docker run --name neobank-db \
@@ -186,15 +328,17 @@ cd server
 npm install
 ```
 
-Создайте файл `.env` в папке `server`:
+Создайте `.env`:
 
 ```env
 DATABASE_URL="postgresql://postgres:password@localhost:5432/neobank"
-JWT_SECRET="your_super_secret_key"
+JWT_SECRET="your_secret_key"
 PORT=5000
+ML_SERVICE_URL=http://localhost:8000
+USE_ML_SCORING=true
 ```
 
-Примените миграции и запустите сервер:
+Миграции и запуск:
 
 ```bash
 npx prisma migrate dev --name init
@@ -213,68 +357,79 @@ npm run dev
 
 🟢 Клиент: **http://localhost:5173**
 
+### 5️⃣ Запуск ML-сервиса (опционально)
+
+```bash
+cd ../neobank-ml
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+pip install -r ml-service/requirements.txt
+cd ml-service
+uvicorn app:app --reload --port 8000
+```
+
+🟢 ML-сервис: **http://localhost:8000**
+
+> ⚠️ Если ML-сервис не запущен — NEOBANK автоматически использует fallback (аддитивную свёртку).
+
 ---
 
 ## 📁 Структура проекта
 
 ```
-neobank/
+NeoBank/
 │
-├── 📂 client/                    # React-приложение
-│   ├── src/
-│   │   ├── 📂 components/        # Компоненты (Card, TransferForm, ...)
-│   │   ├── 📂 pages/             # Страницы (Dashboard, Credit, Admin, ...)
-│   │   ├── 📄 api.js             # Настройка Axios
-│   │   └── 📄 App.jsx
-│   └── 📄 package.json
+├── 📂 client/                       # React-приложение
+│   └── src/
+│       ├── 📂 components/           # Переиспользуемые компоненты
+│       ├── 📂 pages/                # Страницы приложения
+│       ├── 📄 api.js                # Axios
+│       └── 📄 App.jsx
 │
-├── 📂 server/                    # Node.js-сервер
+├── 📂 server/                       # Node.js-сервер
 │   ├── 📂 prisma/
-│   │   └── 📄 schema.prisma      # Схема БД
-│   ├── 📄 scoring.js             # Модуль скоринга
-│   ├── 📄 index.js               # Точка входа
-│   └── 📄 package.json
+│   │   └── 📄 schema.prisma         # Схема БД
+│   ├── 📄 scoring.js                # Аддитивная свёртка (fallback)
+│   ├── 📄 ml-scoring.js             # Клиент к ML-сервису
+│   ├── 📄 scoring-service.js        # Гибридная логика
+│   └── 📄 index.js                  # Точка входа
 │
 └── 📄 README.md
 ```
 
 ---
 
-## 🔌 Основные API endpoints
+## 🔌 API Endpoints
 
 ### 🔐 Аутентификация
-
 | Метод | Endpoint | Описание |
 |:-----:|----------|----------|
-| `POST` | `/api/register` | Регистрация нового пользователя |
+| `POST` | `/api/register` | Регистрация |
 | `POST` | `/api/login` | Вход пользователя |
 | `POST` | `/api/admin/login` | Вход администратора |
 
 ### 👤 Пользователь
-
 | Метод | Endpoint | Описание |
 |:-----:|----------|----------|
-| `GET` | `/api/me` | Данные текущего пользователя |
-| `GET` | `/api/cards` | Список карт пользователя |
-| `POST` | `/api/deposit` | Пополнение баланса |
-| `POST` | `/api/transfer` | Перевод другому пользователю |
-| `PATCH` | `/api/cards/:id/settings` | Изменение лимита и блокировка |
+| `GET` | `/api/me` | Данные пользователя |
+| `GET` | `/api/cards` | Список карт |
+| `POST` | `/api/deposit` | Пополнение |
+| `POST` | `/api/transfer` | Перевод |
+| `PATCH` | `/api/cards/:id/settings` | Лимит и блокировка |
 
 ### 🏦 Кредиты
-
 | Метод | Endpoint | Описание |
 |:-----:|----------|----------|
-| `GET` | `/api/credit/rate` | Получить индивидуальную ставку |
+| `GET` | `/api/credit/rate` | **Индивидуальная ставка (ML/fallback)** |
 | `POST` | `/api/credit/apply` | Оформить кредит |
-| `POST` | `/api/credit/withdraw` | Снять средства с кредита |
-| `POST` | `/api/credit/repay` | Погасить кредит |
+| `POST` | `/api/credit/withdraw` | Снять средства |
+| `POST` | `/api/credit/repay` | Погашение |
 
 ### 👨‍💼 Администратор
-
 | Метод | Endpoint | Описание |
 |:-----:|----------|----------|
 | `GET` | `/api/admin/users` | Все пользователи |
-| `GET` | `/api/admin/stats` | Сводная статистика |
+| `GET` | `/api/admin/stats` | Статистика |
 | `GET` | `/api/admin/transactions` | Все транзакции |
 | `GET` | `/api/admin/credits` | Все кредиты |
 
@@ -294,14 +449,15 @@ neobank/
 
 ## 🧪 Тестирование
 
-Проведено функциональное тестирование методом **«чёрного ящика»** — проверка по входным и выходным данным без анализа внутреннего кода.
+Проведено функциональное тестирование методом **«чёрного ящика»** + тестирование ML-модели.
 
 | Функционал | Статус |
 |------------|:------:|
 | Регистрация и авторизация | ✅ |
 | Управление картами | ✅ |
 | Пополнение и переводы | ✅ |
-| Оформление кредита со скорингом | ✅ |
+| Оформление кредита с ML-скорингом | ✅ |
+| Fallback на аддитивную свёртку | ✅ |
 | Автоматическое списание | ✅ |
 | Аналитика и фильтрация | ✅ |
 | Панель администратора | ✅ |
@@ -310,17 +466,19 @@ neobank/
 
 ## 🗺️ Планы развития
 
+- 🤖 Замена LogReg на **XGBoost** (повышение ROC-AUC)
+- 📈 Прогнозирование расходов (time series)
+- 🏷️ Автоклассификация транзакций (NLP)
 - 🔔 Push-уведомления
 - 💳 Интеграция с внешними платёжными системами
 - 📱 Мобильное приложение (React Native)
-- 📈 Расширенные аналитические отчёты
-- 🤖 ML для улучшения скоринговой модели
+- 🐳 Docker Compose для запуска одной командой
 
 ---
 
 ## 👩‍💻 Автор
 
-**Алиева Алина Саидовна** 
+**Алиева Алина Саидовна**
 
 Специальность: `09.02.07 — Информационные системы и программирование`
 Московский колледж управления, гостиничного бизнеса и информационных технологий «Царицыно»
@@ -331,3 +489,5 @@ neobank/
 ## 📄 Лицензия
 
 Проект создан в учебных целях в рамках дипломной работы. 
+
+---
