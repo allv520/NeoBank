@@ -9,7 +9,6 @@
   <img src="https://img.shields.io/badge/PostgreSQL-15-4169E1?style=for-the-badge&logo=postgresql&logoColor=white" alt="PostgreSQL"/>
   <img src="https://img.shields.io/badge/Prisma-ORM-2D3748?style=for-the-badge&logo=prisma&logoColor=white" alt="Prisma"/>
   <img src="https://img.shields.io/badge/Docker-2496ED?style=for-the-badge&logo=docker&logoColor=white" alt="Docker"/>
-  <img src="https://img.shields.io/badge/scikit--learn-1.9-F7931E?style=for-the-badge&logo=scikitlearn&logoColor=white" alt="scikit-learn"/>
 </p>
 
 <p align="center">
@@ -30,38 +29,22 @@
 ## 📸 Скриншоты
 
 ### 🏠 Главная страница
-
 <img src="docs/screenshots/landing.jpg" alt="Главная страница" width="100%"/>
 
----
-
 ### 👤 Личный кабинет
-
 <img src="docs/screenshots/dashboard.jpg" alt="Личный кабинет" width="100%"/>
 
----
-
 ### 📊 Аналитика транзакций
-
-<img src="docs/screenshots/analytics.jpg" alt="Аналитика транзакций" width="100%"/>
-
----
+<img src="docs/screenshots/analytics.jpg" alt="Аналитика" width="100%"/>
 
 ### 💳 Управление картами
-
-<img src="docs/screenshots/cards.jpg" alt="Управление картами" width="100%"/>
-
----
+<img src="docs/screenshots/cards.jpg" alt="Карты" width="100%"/>
 
 ### 🏦 Кредиты со скорингом
-
-<img src="docs/screenshots/credit.jpg" alt="Кредиты со скорингом" width="100%"/>
-
----
+<img src="docs/screenshots/credit.jpg" alt="Кредиты" width="100%"/>
 
 ### 👨‍💼 Панель администратора
-
-<img src="docs/screenshots/admin.jpg" alt="Панель администратора" width="100%"/>
+<img src="docs/screenshots/admin.jpg" alt="Админ-панель" width="100%"/>
 
 ---
 
@@ -100,8 +83,6 @@
 
 ## 🏗️ Архитектура
 
-### Общая схема
-
 ```
 ┌──────────────────────────────────────────────────────┐
 │              👤 Пользователь / 👨‍💼 Админ             │
@@ -132,35 +113,6 @@
 └──────────────────────────────────────────────────────┘
 ```
 
-### ML-модуль
-
-```mermaid
-flowchart TB
-    User(("👤<br/>Пользователь"))
-    
-    React["🖥️ React Client<br/><i>:5173</i>"]
-    Node["⚙️ Node.js Server<br/><b>NEOBANK</b><br/><i>:5000</i>"]
-    ML["🐍 ML-Service<br/><b>FastAPI</b><br/><i>:8000</i>"]
-    Model[("📦 model.pkl<br/>LogisticRegression")]
-    DB[("🗄️ PostgreSQL<br/><i>Docker</i>")]
-    Fallback["📐 Fallback<br/>Аддитивная свёртка"]
-    
-    User --> React
-    React -->|"HTTP"| Node
-    Node -->|"HTTP /predict"| ML
-    ML --> Model
-    Node -.->|"если ML упал"| Fallback
-    Node -->|"Prisma"| DB
-    
-    style User fill:#6e45e2,color:#fff
-    style React fill:#61DAFB,color:#000
-    style Node fill:#339933,color:#fff
-    style ML fill:#3776AB,color:#fff
-    style Model fill:#F7931E,color:#fff
-    style DB fill:#4169E1,color:#fff
-    style Fallback fill:#ff6b6b,color:#fff
-```
-
 ---
 
 ## 🧠 ML-модуль
@@ -168,9 +120,9 @@ flowchart TB
 > 📂 **Полный ML-пайплайн и код вынесены в отдельный репозиторий:**  
 > 👉 [**neobank_ml**](https://github.com/allv520/neobank_ml)
 
-Помимо классического подхода (аддитивная свёртка), в проект **интегрирована ML-модель** кредитного скоринга.
+Помимо классического подхода к скорингу (аддитивная свёртка), в проект **интегрирована ML-модель** кредитного скоринга.
 
-### 🎯 Сравнение подходов
+### 🎯 Что даёт ML
 
 | Подход | Принцип | ROC-AUC |
 |--------|---------|:-------:|
@@ -188,95 +140,27 @@ flowchart TB
 
 ### 📊 Метрики ML-модели
 
-Обучено 3 модели на **1000 примерах**:
+| Модель | Accuracy | ROC-AUC |
+|--------|:--------:|:-------:|
+| Random Forest | 0.770 | **0.727** 🥇 |
+| Logistic Regression | 0.770 | 0.675 |
+| Decision Tree | 0.730 | 0.667 |
 
-| Модель | Accuracy | Precision | Recall | F1 | **ROC-AUC** |
-|--------|:--------:|:---------:|:------:|:--:|:-----------:|
-| **Random Forest** | 0.770 | 0.524 | 0.234 | 0.324 | **0.727** |
-| Logistic Regression | 0.770 | 0.529 | 0.191 | 0.281 | 0.675 |
-| Decision Tree | 0.730 | 0.333 | 0.149 | 0.206 | 0.667 |
+**Топ-3 важных признака:** `debt_ratio` (0.289), `expense` (0.178), `income` (0.156).
 
-### 📈 Важность признаков (Random Forest)
+### 📈 Сравнение ML vs аддитивной
 
-| Признак | Важность |
-|---------|:--------:|
-| `debt_ratio` | **0.289** |
-| `expense` | 0.178 |
-| `income` | 0.156 |
-| `days_on_platform` | 0.129 |
-| `balance` | 0.123 |
-| `has_overdue` | 0.045 |
-| `active_cards` | 0.041 |
-| `closed_credits` | 0.039 |
-
-### 📉 Сравнение ML и аддитивной свёртки
-
-На **10 реальных пользователях**:
-
-| Пользователь | Аддитивная | ML | Разница |
-|:------------:|:----------:|:--:|:-------:|
-| 1 | 18.23% | 9.93% | -8.30 |
-| 2 | 15.62% | 6.64% | -8.98 |
-| 3 | 14.43% | 7.89% | -6.54 |
-| 4 | 16.49% | 8.01% | -8.48 |
-| 5 | 15.89% | 8.31% | -7.58 |
-| 6 | 15.81% | 6.89% | -8.92 |
-| 7 | 17.01% | 8.96% | -8.05 |
-| 8 | 15.89% | 6.79% | -9.10 |
-| 9 | 14.01% | 6.56% | -7.45 |
-| 10 | 17.36% | 7.35% | -10.01 |
-
-**Вывод:** ML-модель даёт **более низкие и калиброванные** ставки для надёжных заёмщиков. Это делает кредитование **доступнее**.
-
-### 🚀 Запуск ML-сервиса
-
-```bash
-# 1. Активируем виртуальное окружение
-cd neobank-ml
-.venv\Scripts\Activate.ps1
-
-# 2. Запускаем Uvicorn
-cd ml-service
-uvicorn app:app --reload --port 8000
-```
-
-**Проверка:** `http://localhost:8000` → JSON со статусом `ok`.
-
-### 🧪 Тест ML-предсказания
-
-```bash
-curl -X POST http://localhost:8000/predict \
-  -H "Content-Type: application/json" \
-  -d '{
-    "income": 22000, "expense": 8000, "debt_ratio": 0.36,
-    "balance": 180000, "active_cards": 2, "days_on_platform": 300,
-    "closed_credits": 1, "has_overdue": 0
-  }'
-```
-
-**Ответ:**
-```json
-{"default_proba": 0.1545, "rate": 8.09, "model": "LogisticRegression"}
-```
+На 10 реальных пользователях: **ML даёт ставку на 7–10 п.п. ниже**, потому что лучше калибрует риск для надёжных заёмщиков.
 
 ---
 
 ## 🧮 Математическая модель скоринга (fallback)
 
-Индивидуальная процентная ставка рассчитывается по методу **аддитивной свёртки критериев**.
-
-### Формула скорингового балла
+Если ML-сервис недоступен, используется **аддитивная свёртка критериев**:
 
 ```
 S = Σ (w_k × x_k),  k = 1..8
 ```
-
-где:
-- `S` — интегральный скоринговый балл пользователя
-- `w_k` — вес k-го критерия
-- `x_k` — нормализованное значение критерия (от 0 до 1)
-
-### Критерии оценки
 
 | № | Критерий | Вес | Влияние |
 |:-:|----------|:---:|:-------:|
@@ -289,13 +173,7 @@ S = Σ (w_k × x_k),  k = 1..8
 | 7 | Количество погашенных кредитов | 1.0 | ➕ |
 | 8 | Наличие просрочек | 1.3 | ➖ |
 
-### Формула расчёта ставки
-
-```
-r = 5 + (1 − S / 8) × 20
-```
-
-📌 **Диапазон ставок:** от **5%** (надёжные заёмщики) до **25%** (высокий риск).
+**Формула ставки:** `r = 5 + (1 − S / 8) × 20` (диапазон 5–25%).
 
 ---
 
@@ -303,7 +181,6 @@ r = 5 + (1 − S / 8) × 20
 
 ### Требования
 - Node.js **18+**
-- Python **3.12+**
 - PostgreSQL **15+** (или Docker)
 - npm / yarn
 
@@ -360,13 +237,14 @@ npm run dev
 
 🟢 Клиент: **http://localhost:5173**
 
-### 5️⃣ Запуск ML-сервиса (опционально)
+### 5️⃣ ML-сервис (опционально)
 
 ```bash
-cd ../neobank-ml
+git clone https://github.com/allv520/neobank_ml.git
+cd neobank_ml
 python -m venv .venv
 .venv\Scripts\Activate.ps1
-pip install -r ml-service/requirements.txt
+pip install jupyter pandas numpy scikit-learn matplotlib seaborn joblib fastapi uvicorn
 cd ml-service
 uvicorn app:app --reload --port 8000
 ```
@@ -402,9 +280,10 @@ NeoBank/
 
 ---
 
-## 🔌 API Endpoints
+## 🔌 Основные API endpoints
 
 ### 🔐 Аутентификация
+
 | Метод | Endpoint | Описание |
 |:-----:|----------|----------|
 | `POST` | `/api/register` | Регистрация |
@@ -412,6 +291,7 @@ NeoBank/
 | `POST` | `/api/admin/login` | Вход администратора |
 
 ### 👤 Пользователь
+
 | Метод | Endpoint | Описание |
 |:-----:|----------|----------|
 | `GET` | `/api/me` | Данные пользователя |
@@ -421,6 +301,7 @@ NeoBank/
 | `PATCH` | `/api/cards/:id/settings` | Лимит и блокировка |
 
 ### 🏦 Кредиты
+
 | Метод | Endpoint | Описание |
 |:-----:|----------|----------|
 | `GET` | `/api/credit/rate` | **Индивидуальная ставка (ML/fallback)** |
@@ -429,6 +310,7 @@ NeoBank/
 | `POST` | `/api/credit/repay` | Погашение |
 
 ### 👨‍💼 Администратор
+
 | Метод | Endpoint | Описание |
 |:-----:|----------|----------|
 | `GET` | `/api/admin/users` | Все пользователи |
@@ -479,10 +361,15 @@ NeoBank/
 
 ---
 
+## 🔗 Связанные репозитории
+
+- 🤖 [**neobank_ml**](https://github.com/allv520/neobank_ml) — ML-модуль кредитного скоринга
+
+---
+
 ## 👩‍💻 Автор
 
-**Алиева Алина Саидовна**
-
+**Алиева Алина Саидовна** 
 Специальность: `09.02.07 — Информационные системы и программирование`
 Московский колледж управления, гостиничного бизнеса и информационных технологий «Царицыно»
 📍 Москва, 2026
@@ -491,6 +378,6 @@ NeoBank/
 
 ## 📄 Лицензия
 
-Проект создан в учебных целях в рамках дипломной работы. 
+Проект создан в учебных целях в рамках дипломной работы.
 
 ---
