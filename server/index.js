@@ -5,8 +5,8 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { PrismaClient } = require('@prisma/client');
 
-// Подключаем модуль скоринга
-const calculateInterestRate = require('./scoring');
+// Подключаем сервис скоринга (ML + fallback на аддитивную свёртку)
+const { getInterestRate } = require('./scoring-service');
 
 const app = express();
 const PORT = process.env.PORT || 5000;
@@ -245,7 +245,6 @@ app.patch('/api/cards/:cardId/settings', authenticateToken, async (req, res) => 
   const userId = req.user.userId;
   const { monthlyLimit, isBlocked } = req.body;
 
-  // Принадлежит ли карта пользователю
   const card = await prisma.card.findFirst({
     where: { id: cardId, userId }
   });
@@ -406,10 +405,10 @@ function calculateMonthlyPayment(amount, months, annualRate) {
   return amount * monthlyRate * factor / (factor - 1);
 }
 
-// Эндпоинт для получения индивидуальной ставки
+// Эндпоинт для получения индивидуальной ставки (ML + fallback)
 app.get('/api/credit/rate', authenticateToken, async (req, res) => {
   try {
-    const rate = await calculateInterestRate(req.user.userId);
+    const rate = await getInterestRate(req.user.userId);
     res.json({ rate });
   } catch (err) {
     console.error(err);
@@ -436,7 +435,7 @@ app.post('/api/credit/apply', authenticateToken, async (req, res) => {
 
     let interestRate;
     try {
-      interestRate = await calculateInterestRate(userId);
+      interestRate = await getInterestRate(userId);
     } catch (err) {
       console.error('Ошибка скоринга, используется ставка по умолчанию 12%', err);
       interestRate = 12.0;
@@ -480,13 +479,11 @@ app.get('/api/credit', authenticateToken, async (req, res) => {
     const now = new Date();
     let updated = false;
 
-    // Автоматическое списание при наступлении даты платежа
     while (now >= credit.nextPaymentDate && credit.status !== 'closed') {
       const user = await prisma.user.findUnique({ where: { id: userId } });
       const totalDue = credit.monthlyPayment;
 
       if (user.balance >= totalDue) {
-        // Списание
         await prisma.$transaction(async (tx) => {
           await tx.user.update({
             where: { id: userId },
@@ -524,7 +521,6 @@ app.get('/api/credit', authenticateToken, async (req, res) => {
         credit = await prisma.credit.findUnique({ where: { id: credit.id } });
         updated = true;
       } else {
-        // Недостаточно средств – начисление пени
         const daysOverdue = Math.floor((now - credit.nextPaymentDate) / (1000 * 60 * 60 * 24));
         if (daysOverdue > 0) {
           const penaltyRate = 0.001;
