@@ -142,7 +142,7 @@
 
 | Модель | Accuracy | ROC-AUC |
 |--------|:--------:|:-------:|
-| Random Forest | 0.770 | **0.727** 🥇 |
+| Random Forest | 0.770 | **0.727** |
 | Logistic Regression | 0.770 | 0.675 |
 | Decision Tree | 0.730 | 0.667 |
 
